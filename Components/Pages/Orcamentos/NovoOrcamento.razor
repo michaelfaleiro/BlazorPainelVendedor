@@ -1,0 +1,109 @@
+@inject IOrcamentoService OrcamentoService
+
+
+<div class="modal @Show" style="display: @Display; background-color: rgba(0, 0, 0, 0.5);" tabindex="-1" role="dialog">
+    <div class="modal-dialog bg-light">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-center">Novo Orcamento</h3>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <EditForm Model="Model" OnValidSubmit="HandleSubmit">
+
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+
+                        <div class="">
+                            <label for="cliente" class="form-label">Cliente</label>
+                            <InputText class="form-control" id="cliente" @bind-Value="Model.Cliente" />
+                        </div>
+
+                        <div class="">
+                            <label for="telefone" class="form-label">Telefone</label>
+                            <InputText class="form-control" id="cliente" @bind-Value="Model.Telefone" />
+                        </div>
+
+                        <div class="">
+                            <label for="carro" class="form-label">Veículo</label>
+                            <InputText class="form-control" id="veiculo" @bind-Value="Model.Carro" />
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col">
+                                <label for="placa" class="form-label">Placa</label>
+                                <InputText class="form-control" id="placa" @bind-Value="Model.Placa" />
+                            </div>
+
+                            <div class="col">
+                                <label for="chassi" class="form-label">Chassi</label>
+                                <InputText class="form-control" id="chassi" @bind-Value="Model.Chassis" />
+                            </div>
+                        </div>
+
+                        <dir class="d-flex me-5 gap-2">
+                            <button type="submit" class="btn btn-primary w-100">Salvar</button>
+                            <button type="button" class="btn btn-danger w-100" @onclick="() => Close()">Fechar</button>
+                        </dir>
+
+
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public bool ShowCreateOrcamento { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ModalClose { get; set; }
+
+    [Parameter]
+    public EventCallback CarregarDados { get; set; }
+
+    [Parameter]
+    public string Show { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Display { get; set; } = "none;";
+
+    [Parameter]
+    public Models.Orcamento Model { get; set; }
+
+
+    async Task HandleSubmit()
+    {
+
+        if (string.IsNullOrEmpty(Model.Id))
+        {
+            await OrcamentoService.CreateAsync(Model);
+            await ModalClose.InvokeAsync(false);
+            await Close();
+            await CarregarDados.InvokeAsync();
+        }
+        else
+        {
+            await OrcamentoService.UpdateOrcamentoAsync(Model.Id!, Model);
+            await ModalClose.InvokeAsync(false);
+            await Close();
+            await CarregarDados.InvokeAsync();
+        }
+
+    }
+
+    async Task Close()
+    {
+        Display = "none;";
+        Show = string.Empty;
+        await ModalClose.InvokeAsync(false);
+    }
+}

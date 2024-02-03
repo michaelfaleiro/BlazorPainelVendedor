@@ -1,0 +1,148 @@
+@page "/orcamentos"
+@inject IOrcamentoService OrcamentoService
+@rendermode InteractiveServer
+
+
+<PageTitle>Orcamentos</PageTitle>
+
+
+
+<main>
+
+    <div class="pb-2">
+        <button @onclick="ShowModal" class="btn btn-secondary">Novo Orcamento</button>
+    </div>
+
+
+    <section>
+        @if (ShowCreateOrcamento)
+        {
+            <NovoOrcamento Model="@ItemEdit" ShowCreateOrcamento="@ShowCreateOrcamento" ModalClose="HandleModalFechada"
+                Show="show" Display="block" CarregarDados="CarregarDados" />
+        }
+    </section>
+
+    <section>
+        <table class="table table-secondary table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Cliente
+                    </th>
+                    <th>
+                        Veiculo
+                    </th>
+                    <th>
+                        Placa
+                    </th>
+                    <th>
+                        Chassi
+                    </th>
+                    <th>
+                        Data Criação
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ListaOrcamentos is not null)
+                {
+                    @foreach (var orcamento in ListaOrcamentos)
+                    {
+                        <tr>
+                            <td>
+                                @orcamento.Cliente
+                            </td>
+                            <td>
+                                @orcamento.Carro
+                            </td>
+                            <td>
+                                @orcamento.Placa
+                            </td>
+                            <td>
+                                @orcamento.Chassis
+                            </td>
+                            <td>
+                                @orcamento.CreatedAt.ToShortDateString()
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info" @onclick="async () => await GetOrcamento(orcamento.Id!)">
+                                    Editar
+                                </button>
+                                <button @onclick="async () => await RemoveOrcamento(orcamento.Id!)" class="btn-sm btn-danger">
+                                    Deletar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>Nenhum Orcamento</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                }
+            </tbody>
+
+
+
+        </table>
+    </section>
+</main>
+
+
+@code {
+
+    public List<Models.Orcamento> ListaOrcamentos = [];
+
+    public Models.Orcamento ItemEdit { get; set; } = new();
+    public bool ShowCreateOrcamento { get; set; } = false;
+
+
+    void ShowModal()
+    {
+        ShowCreateOrcamento = !ShowCreateOrcamento;
+    }
+
+    void ShowModal(Models.Orcamento item)
+    {
+        ItemEdit = item;
+        ShowCreateOrcamento = !ShowCreateOrcamento;
+    }
+
+    private void HandleModalFechada(bool modalFechada)
+    {
+        ShowCreateOrcamento = modalFechada;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDados();
+    }
+
+    private async Task CarregarDados()
+    {
+        ListaOrcamentos = await OrcamentoService.GetAsync();
+    }
+
+    private async Task GetOrcamento(string id)
+    {
+        var item = await OrcamentoService.GetByIdAsync(id);
+        ShowModal(item);
+    }
+
+    private async Task RemoveOrcamento(string id)
+    {
+        await OrcamentoService.DeleteAsync(id);
+        await CarregarDados();
+    }
+
+}
