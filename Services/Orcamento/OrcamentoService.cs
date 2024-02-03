@@ -42,7 +42,7 @@ namespace BlazorPainel.Services
             return await _orcamentoCollection.Find(new BsonDocument()).ToListAsync();
         }
 
-        public async Task<Orcamento> GetByIdAsync(string id)
+        public async Task<Orcamento?> GetByIdAsync(string id)
         {
             return await _orcamentoCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }

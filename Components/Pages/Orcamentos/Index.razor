@@ -6,7 +6,6 @@
 <PageTitle>Orcamentos</PageTitle>
 
 
-
 <main>
 
     <div class="pb-2">
@@ -17,7 +16,7 @@
     <section>
         @if (ShowCreateOrcamento)
         {
-            <NovoOrcamento Model="@ItemEdit" ShowCreateOrcamento="@ShowCreateOrcamento" ModalClose="HandleModalFechada"
+            <NovoOrcamento Model="@Model" ShowCreateOrcamento="@ShowCreateOrcamento" ModalClose="HandleModalFechada"
                 Show="show" Display="block" CarregarDados="CarregarDados" />
         }
     </section>
@@ -103,18 +102,17 @@
 
     public List<Models.Orcamento> ListaOrcamentos = [];
 
-    public Models.Orcamento ItemEdit { get; set; } = new();
+    public Models.Orcamento Model { get; set; } = new();
     public bool ShowCreateOrcamento { get; set; } = false;
-
 
     void ShowModal()
     {
         ShowCreateOrcamento = !ShowCreateOrcamento;
     }
 
-    void ShowModal(Models.Orcamento item)
+    void ShowModal(Models.Orcamento orcamento)
     {
-        ItemEdit = item;
+        Model = orcamento;
         ShowCreateOrcamento = !ShowCreateOrcamento;
     }
 
@@ -122,23 +120,19 @@
     {
         ShowCreateOrcamento = modalFechada;
     }
-
     protected override async Task OnInitializedAsync()
     {
         await CarregarDados();
     }
-
     private async Task CarregarDados()
     {
         ListaOrcamentos = await OrcamentoService.GetAsync();
     }
-
     private async Task GetOrcamento(string id)
     {
-        var item = await OrcamentoService.GetByIdAsync(id);
-        ShowModal(item);
+        var orcamento = await OrcamentoService.GetByIdAsync(id);
+        ShowModal(orcamento!);
     }
-
     private async Task RemoveOrcamento(string id)
     {
         await OrcamentoService.DeleteAsync(id);

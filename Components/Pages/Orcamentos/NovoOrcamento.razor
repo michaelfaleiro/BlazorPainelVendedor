@@ -15,17 +15,17 @@
                         <ValidationSummary />
 
 
-                        <div class="">
+                        <div class="mb-3">
                             <label for="cliente" class="form-label">Cliente</label>
                             <InputText class="form-control" id="cliente" @bind-Value="Model.Cliente" />
                         </div>
 
-                        <div class="">
+                        <div class="mb-3">
                             <label for="telefone" class="form-label">Telefone</label>
                             <InputText class="form-control" id="cliente" @bind-Value="Model.Telefone" />
                         </div>
 
-                        <div class="">
+                        <div class="mb-3">
                             <label for="carro" class="form-label">Veículo</label>
                             <InputText class="form-control" id="veiculo" @bind-Value="Model.Carro" />
                         </div>
@@ -79,7 +79,6 @@
     [Parameter]
     public Models.Orcamento Model { get; set; }
 
-
     async Task HandleSubmit()
     {
 
@@ -97,7 +96,6 @@
             await Close();
             await CarregarDados.InvokeAsync();
         }
-
     }
 
     async Task Close()
