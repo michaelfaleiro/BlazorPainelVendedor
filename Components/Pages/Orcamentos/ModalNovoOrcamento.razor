@@ -2,8 +2,8 @@
 
 
 <div class="modal @Show" style="display: @Display; background-color: rgba(0, 0, 0, 0.5);" tabindex="-1" role="dialog">
-    <div class="modal-dialog bg-light">
-        <div class="modal-content">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark bg-gradient">
             <div class="modal-header">
                 <h3 class="text-center">Novo Orcamento</h3>
             </div>
@@ -62,10 +62,10 @@
 @code {
 
     [Parameter]
-    public bool ShowCreateOrcamento { get; set; }
+    public bool ShowModalCreateOrcamento { get; set; }
 
     [Parameter]
-    public EventCallback<bool> ModalClose { get; set; }
+    public EventCallback<bool> CloseModal { get; set; }
 
     [Parameter]
     public EventCallback CarregarDados { get; set; }
@@ -85,23 +85,23 @@
         if (string.IsNullOrEmpty(Model.Id))
         {
             await OrcamentoService.CreateAsync(Model);
-            await ModalClose.InvokeAsync(false);
-            await Close();
-            await CarregarDados.InvokeAsync();
+            Model = new Models.Orcamento();
+            StateHasChanged();
         }
         else
         {
             await OrcamentoService.UpdateOrcamentoAsync(Model.Id!, Model);
-            await ModalClose.InvokeAsync(false);
-            await Close();
-            await CarregarDados.InvokeAsync();
         }
+
+        await CloseModal.InvokeAsync(false);
+        await Close();
+        await CarregarDados.InvokeAsync();
     }
 
     async Task Close()
     {
         Display = "none;";
         Show = string.Empty;
-        await ModalClose.InvokeAsync(false);
+        await CloseModal.InvokeAsync(false);
     }
 }

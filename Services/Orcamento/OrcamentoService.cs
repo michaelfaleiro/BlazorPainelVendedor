@@ -1,4 +1,3 @@
-
 using BlazorPainel.Data;
 using BlazorPainel.Models;
 using Microsoft.Extensions.Options;
@@ -62,6 +61,8 @@ namespace BlazorPainel.Services
 
         public async Task AddProdutoOrcamentoAsync(string id, Produto produto)
         {
+            produto.Id = ObjectId.GenerateNewId().ToString();
+
             FilterDefinition<Orcamento> filter = Builders<Orcamento>.Filter.Eq(orcamento => orcamento.Id, id);
 
             UpdateDefinition<Orcamento> update = Builders<Orcamento>.Update.AddToSet<Produto>("produtos", produto);
@@ -100,6 +101,5 @@ namespace BlazorPainel.Services
             await _orcamentoCollection.DeleteOneAsync(filter);
             return;
         }
-
     }
 }

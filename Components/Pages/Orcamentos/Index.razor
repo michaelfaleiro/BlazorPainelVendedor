@@ -5,97 +5,108 @@
 
 <PageTitle>Orcamentos</PageTitle>
 
+@if (ListaOrcamentos.Count == 0)
+{
+    <p>Carregando...</p>
+}
+else
+{
+    <main>
+        <div class="pb-2">
+            <button @onclick="ShowModal" class="btn btn-secondary">Novo Orcamento</button>
+        </div>
 
-<main>
+        <section>
+            @if (ShowModalCreateOrcamento)
+            {
+                <ModalNovoOrcamento Model="@Model" ShowModalCreateOrcamento="@ShowModalCreateOrcamento"
+                    CloseModal="HandleCloseModal" Show="show" Display="block" CarregarDados="CarregarDados" />
+            }
+        </section>
 
-    <div class="pb-2">
-        <button @onclick="ShowModal" class="btn btn-secondary">Novo Orcamento</button>
-    </div>
-
-
-    <section>
-        @if (ShowCreateOrcamento)
-        {
-            <NovoOrcamento Model="@Model" ShowCreateOrcamento="@ShowCreateOrcamento" ModalClose="HandleModalFechada"
-                Show="show" Display="block" CarregarDados="CarregarDados" />
-        }
-    </section>
-
-    <section>
-        <table class="table table-secondary table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>
-                        Cliente
-                    </th>
-                    <th>
-                        Veiculo
-                    </th>
-                    <th>
-                        Placa
-                    </th>
-                    <th>
-                        Chassi
-                    </th>
-                    <th>
-                        Data Criação
-                    </th>
-                    <th>
-
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (ListaOrcamentos is not null)
-                {
-                    @foreach (var orcamento in ListaOrcamentos)
+        <section>
+            <table class="table table-sm table-secondary table-striped table-hover table-responsive">
+                <thead class="table-dark text-secondary-emphasis">
+                    <tr>
+                        <th>
+                            Cliente
+                        </th>
+                        <th>
+                            Telefone
+                        </th>
+                        <th>
+                            Veiculo
+                        </th>
+                        <th>
+                            Placa
+                        </th>
+                        <th>
+                            Chassi
+                        </th>
+                        <th>
+                            Data Criação
+                        </th>
+                        <th>
+                            Ações
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ListaOrcamentos is not null)
+                    {
+                        @foreach (var orcamento in ListaOrcamentos)
+                        {
+                            <tr>
+                                <td>
+                                    @orcamento.Cliente
+                                </td>
+                                <td>
+                                    @orcamento.Telefone
+                                </td>
+                                <td>
+                                    @orcamento.Carro
+                                </td>
+                                <td>
+                                    @orcamento.Placa
+                                </td>
+                                <td>
+                                    @orcamento.Chassis
+                                </td>
+                                <td>
+                                    @orcamento.CreatedAt.ToShortDateString()
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" @onclick="async () => await GetOrcamento(orcamento.Id!)">
+                                        Editar
+                                    </button>
+                                    <a class="btn btn-sm btn-primary" href="/orcamentos/@orcamento.Id">
+                                        Detalhes
+                                    </a>
+                                    <button @onclick="async () => await RemoveOrcamento(orcamento.Id!)" class="btn-sm btn-danger">
+                                        Deletar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>
-                                @orcamento.Cliente
-                            </td>
-                            <td>
-                                @orcamento.Carro
-                            </td>
-                            <td>
-                                @orcamento.Placa
-                            </td>
-                            <td>
-                                @orcamento.Chassis
-                            </td>
-                            <td>
-                                @orcamento.CreatedAt.ToShortDateString()
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-info" @onclick="async () => await GetOrcamento(orcamento.Id!)">
-                                    Editar
-                                </button>
-                                <button @onclick="async () => await RemoveOrcamento(orcamento.Id!)" class="btn-sm btn-danger">
-                                    Deletar
-                                </button>
-                            </td>
+                            <td>Nenhum Orcamento</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td>Nenhum Orcamento</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                }
-            </tbody>
+                </tbody>
+            </table>
+        </section>
+    </main>
+}
 
 
-
-        </table>
-    </section>
-</main>
 
 
 @code {
@@ -103,22 +114,22 @@
     public List<Models.Orcamento> ListaOrcamentos = [];
 
     public Models.Orcamento Model { get; set; } = new();
-    public bool ShowCreateOrcamento { get; set; } = false;
+    public bool ShowModalCreateOrcamento { get; set; } = false;
 
     void ShowModal()
     {
-        ShowCreateOrcamento = !ShowCreateOrcamento;
+        ShowModalCreateOrcamento = !ShowModalCreateOrcamento;
     }
 
     void ShowModal(Models.Orcamento orcamento)
     {
         Model = orcamento;
-        ShowCreateOrcamento = !ShowCreateOrcamento;
+        ShowModalCreateOrcamento = !ShowModalCreateOrcamento;
     }
 
-    private void HandleModalFechada(bool modalFechada)
+    private void HandleCloseModal(bool closeModal)
     {
-        ShowCreateOrcamento = modalFechada;
+        ShowModalCreateOrcamento = closeModal;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -126,7 +137,15 @@
     }
     private async Task CarregarDados()
     {
-        ListaOrcamentos = await OrcamentoService.GetAsync();
+        try
+        {
+            Model = new();
+            ListaOrcamentos = await OrcamentoService.GetAsync();
+        }
+        catch
+        {
+            ListaOrcamentos = [];
+        }
     }
     private async Task GetOrcamento(string id)
     {

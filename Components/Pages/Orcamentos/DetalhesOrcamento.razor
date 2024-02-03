@@ -1,0 +1,190 @@
+@page "/orcamentos/{id}"
+@inject IOrcamentoService OrcamentoService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Detalhes-Orcamento</PageTitle>
+
+
+
+
+
+
+<div class="row" style="height: 98vh;">
+
+
+    <div class="col-2 h-100 d-flex flex-column ">
+        <a class="btn btn-secondary my-1" href="/orcamentos">Voltar</a>
+        <div class="flex-grow-1 mt-2 ">
+            <p>
+                @_orcamento.Cliente
+            </p>
+            <p>
+                @_orcamento.Carro
+            </p>
+            <p>
+                @_orcamento.Placa
+            </p>
+            <p>
+                @_orcamento.Chassis
+            </p>
+            <div class="d-flex gap-2 border-top">
+                <button class="btn-sm btn-success">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                </button>
+                <button class="btn-sm btn-secondary">
+                    <i class="bi bi-printer"></i>
+                </button>
+
+            </div>
+        </div>
+        <div class="border-1 border-top border-secondary">
+            <header class="text-center p-1">
+                <p>Totais</p>
+            </header>
+            <section>
+                <p>Produtos
+                    <span>@_orcamento.Total.ToString("C")</span>
+                </p>
+                <p>Cupom</p>
+                <p>Desconto</p>
+                <p>Frete</p>
+                <p>
+                    Total
+                </p>
+            </section>
+        </div>
+
+    </div>
+    <div class="col-10 h-100 p-1">
+
+        <div class="d-flex gap-2 mb-2">
+
+
+            <div class="pb-2">
+                <button @onclick="ShowModal" class="btn btn-secondary">Adicionar Produto</button>
+            </div>
+
+            @if (ShowModalCreateProduto)
+            {
+
+                <ModalNovoProduto Model="@Produto" ShowModalCreateProduto=@ShowModalCreateProduto
+                    CloseModal="HandleCloseModal" Show="show" Display="block" CarregarDados="CarregarDados"
+                    OrcamentoId="@_orcamento.Id">
+                </ModalNovoProduto>
+            }
+        </div>
+        <table class="table table-secondary table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Quant</th>
+                    <th>Sku</th>
+                    <th>Descrição</th>
+                    <th>Marca</th>
+                    <th>Preço Unitário</th>
+                    <th>Total</th>
+                    <th>Link/Observação</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var produto in _orcamento.Produtos)
+                {
+                    <tr>
+                        <td class="text-center">@produto.Quantidade</td>
+                        <td>@produto.Sku.ToUpper()</td>
+                        <td>@produto.NomeProduto.ToUpper()</td>
+                        <td>@produto.Marca</td>
+                        <td>@produto.PrecoVenda.ToString("C")</td>
+                        <td>@Total(produto.Quantidade, produto.PrecoVenda).ToString("C")</td>
+                        <td>
+                            <a href="@produto.Link" target="_blank">
+                                <i class="bi bi-browser-chrome"></i>
+                            </a>
+                        </td>
+                        <td>
+                            <button @onclick="() => EditarProduto(produto)" class="btn-info"><i
+                                    class="bi bi-pencil-square"></i></button>
+                            <button class="btn-danger"
+                                @onclick="async ()  => await RemoveProduto(_orcamento.Id,produto.Id)"><i
+                                    class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    Models.Orcamento _orcamento { get; set; } = new();
+
+    Models.Produto Produto { get; set; } = new();
+
+    public bool ShowModalCreateProduto { get; set; } = false;
+
+    void ShowModal()
+    {
+        ShowModalCreateProduto = !ShowModalCreateProduto;
+    }
+
+    void ShowModal(Models.Produto produto)
+    {
+        Produto = produto;
+        ShowModalCreateProduto = !ShowModalCreateProduto;
+    }
+
+    private void HandleCloseModal(bool closeModal)
+    {
+        ShowModalCreateProduto = closeModal;
+    }
+
+    private async Task CarregarDados()
+    {
+        try
+        {
+            Produto = new();
+            _orcamento = await OrcamentoService.GetByIdAsync(Id);
+
+            if (_orcamento.Produtos is not null)
+            {
+                double totalGeral = 0;
+                foreach (var item in _orcamento.Produtos)
+                {
+                    var totalOrcamento = item.Quantidade * item.PrecoVenda;
+                    totalGeral += totalOrcamento;
+                }
+                _orcamento.Total = totalGeral;
+            }
+
+        }
+        catch
+        {
+            NavigationManager.NavigateTo("orcamentos");
+        }
+    }
+
+    private async Task RemoveProduto(string orcamentoId, string produtoId)
+    {
+        await OrcamentoService.RemoveProdutoAsync(orcamentoId, produtoId);
+        await CarregarDados();
+    }
+
+    private void EditarProduto(Models.Produto produto)
+    {
+        ShowModal(produto!);
+    }
+
+    public double Total(int quantidade, double preco)
+    {
+        return quantidade * preco;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDados();
+    }
+}

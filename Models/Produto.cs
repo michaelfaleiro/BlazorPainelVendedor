@@ -6,11 +6,7 @@ namespace BlazorPainel.Models
 {
     public class Produto
     {
-        public Produto()
-        {
-            Id = ObjectId.GenerateNewId().ToString();
-        }
-        public string Id { get; set; }
+        public string? Id { get; set; }
         public int Quantidade { get; set; }
         public string Sku { get; set; } = null!;
         public string NomeProduto { get; set; } = null!;

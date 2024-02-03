@@ -1,0 +1,120 @@
+@inject IOrcamentoService OrcamentoService
+
+
+<div class="modal @Show" style="display: @Display; background-color: rgba(0, 0, 0, 0.5);" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark bg-gradient">
+            <div class="modal-header">
+                <h3 class="text-center">Adicionar Produto</h3>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <EditForm Model="Model" OnValidSubmit="HandleSubmitProduto">
+
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="row mb-3">
+                            <div class="col-2 mr-2">
+                                <label for="Quantidade" class="form-label">Quant</label>
+                                <InputNumber class="form-control" id="Quantidade" @bind-Value="Model.Quantidade" />
+                            </div>
+
+                            <div class="col">
+                                <label for="Sku" class="form-label">Sku</label>
+                                <InputText class="form-control" id="Sku" @bind-Value="Model.Sku" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="NomeProduto" class="form-label">Produto</label>
+                            <InputText class="form-control" id="NomeProduto" @bind-Value="Model.NomeProduto" />
+                        </div>
+
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="Marca" class="form-label">Marca</label>
+                                <InputText class="form-control" id="Marca" @bind-Value="Model.Marca" />
+                            </div>
+
+                            <div class="col">
+                                <label for="PrecoVenda" class="form-label">Valor</label>
+                                <InputNumber class="form-control" id="PrecoVenda" @bind-Value="Model.PrecoVenda" />
+                            </div>
+
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="Link" class="form-label">Link</label>
+                            <InputText class="form-control" id="Link" @bind-Value="Model.Link" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Observacao" class="form-label">Observacao</label>
+                            <InputText class="form-control" id="Observacao" @bind-Value="Model.Observacao" />
+                        </div>
+
+
+                        <dir class="d-flex me-5 gap-2">
+                            <button type="submit" class="btn btn-primary w-100">Salvar</button>
+                            <button type="button" class="btn btn-danger w-100" @onclick="() => Close()">Fechar</button>
+                        </dir>
+
+
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string OrcamentoId { get; set; }
+
+    [Parameter]
+    public bool ShowModalCreateProduto { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> CloseModal { get; set; }
+
+    [Parameter]
+    public EventCallback CarregarDados { get; set; }
+
+    [Parameter]
+    public string Show { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Display { get; set; } = "none;";
+
+    [Parameter]
+    public Models.Produto Model { get; set; } = new();
+
+    async Task HandleSubmitProduto()
+    {
+
+        if (string.IsNullOrEmpty(Model.Id))
+        {
+            await OrcamentoService.AddProdutoOrcamentoAsync(OrcamentoId, Model);
+        }
+        else
+        {
+            await OrcamentoService.AtualizarProdutoOrcamento(OrcamentoId, Model.Id, Model);
+        }
+        await CloseModal.InvokeAsync(false);
+        await Close();
+        await CarregarDados.InvokeAsync();
+    }
+
+    async Task Close()
+    {
+        Display = "none;";
+        Show = string.Empty;
+        await CloseModal.InvokeAsync(false);
+        await CarregarDados.InvokeAsync();
+    }
+}
