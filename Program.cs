@@ -12,11 +12,7 @@ builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("Mo
 
 builder.Services.AddSingleton<IOrcamentoService, OrcamentoService>();
 
-
-
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -30,8 +26,6 @@ if (!app.Environment.IsDevelopment())
         options.DetailedErrors = true; // Configuração para detalhes de erros
     });
 }
-
-
 
 app.UseHttpsRedirection();
 
